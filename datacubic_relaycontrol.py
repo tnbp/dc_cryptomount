@@ -49,7 +49,7 @@ def main():
         termios.tcsetattr(t, termios.TCSAFLUSH, attrs)
         t.close()
     except FileNotFoundError as err:
-        print("ERROR: Could not open %s (%s)" % (port, err))
+        print("\033[1m[\033[91m-\033[39m]\033[0m ERROR: Could not open %s (%s)" % (port, err))
         sys.exit(1)
         
     
@@ -58,7 +58,7 @@ def main():
     try:
         s.open()
     except serial.SerialException as err:
-        print(err)
+        print("\033[1m[\033[95m*\033[39m]\033[0m " + err)
         sys.exit(1)
 
     outbuf = "DA7AC1BE" + str(command)
@@ -69,16 +69,16 @@ def main():
         challenge = s.readline().decode().rstrip()
     
     if challenge[:2] == "ON":
-        print("Already ON, exiting!")
+        print("\033[1m[\033[92m+\033[39m]\033[0m Already ON, exiting!")
         sys.exit(0)
     if challenge[:3] == "OFF":
-        print("Already OFF, exiting!")
+        print("\033[1m[\033[92m+\033[39m]\033[0m Already OFF, exiting!")
         sys.exit(0)
     
-    DC_RELAYCTRL_SECRET = getpass("Enter shared secret: ")
+    DC_RELAYCTRL_SECRET = getpass("\033[1m[\033[96m?\033[39m]\033[0m Enter shared secret: ")
     #print("Entered password: \"%s\" (length: %d)" % (DC_RELAYCTRL_SECRET, len(DC_RELAYCTRL_SECRET)))
     if len(DC_RELAYCTRL_SECRET) != 32:
-        print("ERROR: Shared secret must be a 256-bit ASCII string, exiting!")
+        print("\033[1m[\033[91m-\033[39m]\033[0m ERROR: Shared secret must be a 256-bit ASCII string, exiting!")
         sys.exit(1)
     
     #print("Challenge: %s (length: %d)" % (challenge, len(challenge)))
@@ -112,17 +112,17 @@ def main():
         success = s.readline().decode().rstrip()
     
         if success[:2] == "ON":
-            print("Successfully turned ON!")
+            print("\033[1m[\033[92m+\033[39m]\033[0m Successfully turned ON!")
             exitcode = 0
             break
         elif success[:3] == "OFF":
-            print("Successfully turned OFF!")
+            print("\033[1m[\033[92m+\033[39m]\033[0m Successfully turned OFF!")
             exitcode = 0
             break
         elif tries < 3:
             tries += 1
         else:
-            print("ERROR: Status hasn't changed--wrong password?")
+            print("\033[1m[\033[91m-\033[39m]\033[0m Status hasn't changed--wrong password?")
             exitcode = 1
             break
 
