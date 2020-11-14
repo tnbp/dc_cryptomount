@@ -7,70 +7,74 @@ isMounted () {
 STATUS=0
 
 if [ -f /mnt/backup/backup_test ]; then
-        echo "Umounting /mnt/backup ..."
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Umounting /mnt/backup ..."
         umount /mnt/backup
         STATUS="$?"
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-        echo "Could not umount /mnt/backup -- exiting!"
+        echo -e "\e[1m[\e[91m-\e[39m]\e[0m Could not umount /mnt/backup -- exiting!"
         exit 1
 fi
 
 if isMounted "/mnt/.backup_a"; then
-        echo "Umounting /mnt/.backup_a ..."
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Umounting /mnt/.backup_a ..."
         umount /mnt/.backup_a
         STATUS="$?"
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-        echo "Could not umount /mnt/.backup_a -- exiting!"
+        echo -e "\e[1m[\e[91m-\e[39m]\e[0m Could not umount /mnt/.backup_a -- exiting!"
         exit 1
 fi
 
 if isMounted "/mnt/.backup_b"; then
-        echo "Umounting /mnt/.backup_b ..."
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Umounting /mnt/.backup_b ..."
         umount /mnt/.backup_b
         STATUS="$?"
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-        echo "Could not umount /mnt/.backup_b -- exiting!"
+        echo -e "\e[1m[\e[91m-\e[39m]\e[0m Could not umount /mnt/.backup_b -- exiting!"
         exit 1
 fi
 
 if [ -h /dev/mapper/CRYPTO_BACKUP_A ]; then
-        echo "Closing crypto volume CRYPTO_BACKUP_A ..."
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Closing crypto volume CRYPTO_BACKUP_A ..."
         cryptsetup close CRYPTO_BACKUP_A
         STATUS="$?"
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-        echo "Could not close crypto volume CRYPTO_BACKUP_A -- exiting!"
+        echo -e "\e[1m[\e[91m-\e[39m]\e[0m Could not close crypto volume CRYPTO_BACKUP_A -- exiting!"
         exit 1
 fi
 
-echo "Successfully crypto-umounted CRYPTO_BACKUP_A!"
+echo -e "\e[1m[\e[92m+\e[39m]\e[0m Successfully crypto-umounted CRYPTO_BACKUP_A!"
 
 if [ -h /dev/mapper/CRYPTO_BACKUP_B ]; then
-        echo "Closing crypto volume CRYPTO_BACKUP_B ..."
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Closing crypto volume CRYPTO_BACKUP_B ..."
         cryptsetup close CRYPTO_BACKUP_B
         STATUS="$?"
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-        echo "Could not close crypto volume CRYPTO_BACKUP_B -- exiting!"
+        echo -e "\e[1m[\e[91m-\e[39m]\e[0m Could not close crypto volume CRYPTO_BACKUP_B -- exiting!"
         exit 1
 fi
 
-echo "Successfully crypto-umounted CRYPTO_BACKUP_B!"
+echo -e "\e[1m[\e[92m+\e[39m]\e[0m Successfully crypto-umounted CRYPTO_BACKUP_B!"
 
-echo "Detaching..."
+echo -e "\e[1m[\e[95m*\e[39m]\e[0m Detaching..."
 udisksctl power-off -b /dev/disk/by-partlabel/CRYPTO_BACKUP_A
 udisksctl power-off -b /dev/disk/by-partlabel/CRYPTO_BACKUP_B
 
-echo "Syncing..."
+echo -e "\e[1m[\e[95m*\e[39m]\e[0m Syncing..."
 sync
 
-echo "Turning off the power..."
-/opt/datacubic_relaycontrol.py -c 0
+if [[ "$1" != "--force" ]]; then
+        echo -e "\e[1m[\e[95m*\e[39m]\e[0m Turning off the power..."
+        /opt/datacubic_relaycontrol.py -c 0
+else
+        echo -e "\e[1m[\e[93m!\e[39m]\e[0m --force supplied; not turning off the power!"
+fi
